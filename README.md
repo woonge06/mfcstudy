@@ -235,3 +235,412 @@ void CPractice7bView::OnMouseMove(UINT nFlags, CPoint point)
 실행하면 예시로 좌클릭으로 그림을 그리고, 우클릭으로 일부를 지운 화면입니다.
 
 --------------------------
+* 컨트롤 및 리소스
+리스트 컨트롤은 주로 GUI 애플리케이션에서 데이터를 보기 좋은 방식으로 정리하여 표시하기 위해 사용되는 컨트롤로, 데이터를 표 형식으로 나열합니다.
+* 대화상자에 리스트 컨트롤을 사용한 프로젝트
+이 프로젝트에서는 대화상자에 리스트 컨트롤을 만들고, 데이터의 추가, 수정, 삭제를 할 수 있습니다.
+먼저 대화상자를 만들어준뒤 속성을 변경해줍니다.
+![image](https://github.com/user-attachments/assets/ce2dbd49-0b79-4bdd-8ce2-59a8652713c0)
+그 뒤 데이터를 추가하는 버튼을 구현해주었습니다.
+``` ruby
+void CPractice8aDlg::OnClickedButtonInsert()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int nCount = m_listStudent.GetItemCount();
+	CString strCount;
+	UpdateData(TRUE);
+
+	if (!m_strDept.IsEmpty() && !m_strID.IsEmpty() && !m_strName.IsEmpty())
+	{
+		strCount.Format(_T("%d"), nCount + 1);
+		m_listStudent.InsertItem(nCount, strCount);
+		m_listStudent.SetItem(nCount, 1, LVIF_TEXT, m_strDept, 0, 0, 0, 0);
+		m_listStudent.SetItem(nCount, 2, LVIF_TEXT, m_strID, 0, 0, 0, 0);
+		m_listStudent.SetItem(nCount, 3, LVIF_TEXT, m_strName, 0, 0, 0, 0);
+
+		m_strDept.Empty();
+		m_strID.Empty();
+		m_strName.Empty();
+
+		//수정/삭제 버튼을 비활성화 시킨다.
+		((CButton*)GetDlgItem(IDC_BUTTON__MODIFY))->EnableWindow(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_DELETE))->EnableWindow(FALSE);
+		UpdateData(FALSE);
+	}
+
+	else
+	{
+		MessageBox(_T("모든 항목을 입력해 주세요."), _T("잠깐"), MB_OK);
+	}
+}
+```
+데이터가 모두 입력이 되어있다면 리스트 컨트롤에 새로운 항목을 추가한 뒤 입력 필드를 초기화합니다.
+그 뒤 데이터를 수정하는 버튼을 구현하였습니다.
+``` ruby
+void CPractice8aDlg::OnClickedButtonModify()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(TRUE);
+	CString strDept, strID, strName, strIndex;
+	strDept = m_strDept;
+	strID = m_strID;
+	strName = m_strName;
+
+	if (m_nSelectedItem >= 0)
+	{
+
+		if (!m_strDept.IsEmpty() && !m_strID.IsEmpty() && !m_strName.IsEmpty())
+		{
+			strIndex.Format(_T("%d"), m_nSelectedItem + 1);
+			m_listStudent.SetItem(m_nSelectedItem, 0, LVIF_TEXT, strIndex, 0, 0, 0, 0);
+			m_listStudent.SetItem(m_nSelectedItem, 1, LVIF_TEXT, strDept, 0, 0, 0, 0);
+			m_listStudent.SetItem(m_nSelectedItem, 2, LVIF_TEXT, strID, 0, 0, 0, 0);
+			m_listStudent.SetItem(m_nSelectedItem, 3, LVIF_TEXT, strName, 0, 0, 0, 0);
+
+			m_strDept.Empty();
+			m_strID.Empty();
+			m_strName.Empty();
+
+			((CButton*)GetDlgItem(IDC_BUTTON__MODIFY))->EnableWindow(FALSE);
+			((CButton*)GetDlgItem(IDC_BUTTON_DELETE))->EnableWindow(FALSE);
+			UpdateData(FALSE);
+		}
+
+		else
+		{
+			MessageBox(_T("모든 항목을 입력해 주세요."), _T("잠깐"), MB_OK);
+		}
+	}
+
+	else
+	{
+		MessageBox(_T("아이템을 선택하지 않았습니다."), _T("잠깐"), MB_OK);
+	}
+}
+```
+리스트 컨트롤에서 데이터를 클릭한 뒤 에딧 컨트롤에서 데이터를 수정 한 후 수정 버튼을 누르면 에딧 컨트롤에서 수정된 데이터로 리스트 컨트롤의 해당 아이템을 업데이트합니다.
+그 후 데이터를 삭제하는 코드를 구현했습니다.
+``` ruby
+void CPractice8aDlg::OnClickedButtonDelete()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_nSelectedItem >= 0)
+	{
+		m_listStudent.DeleteItem(m_nSelectedItem);
+
+		for (int i = m_nSelectedItem - 1; i < m_listStudent.GetItemCount(); i++)
+		{
+			CString strIndex;
+			strIndex.Format(_T("%d"), i + 1);
+			m_listStudent.SetItemText(i, 0, strIndex);
+		}
+
+		m_strDept.Empty();
+		m_strID.Empty();
+		m_strName.Empty();
+		m_strSelectedItem.Empty();
+
+		((CButton*)GetDlgItem(IDC_BUTTON__MODIFY))->EnableWindow(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_DELETE))->EnableWindow(FALSE);
+		UpdateData(FALSE);
+	}
+
+	else
+	{
+		MessageBox(_T("아이템을 선택하지 않았습니다."), _T("잠깐"), MB_OK);
+	}
+}
+```
+리스트 컨트롤에서 데이터를 클릭한 뒤 삭제 버튼을 누르면 리스트 컨트롤에서 삭제됩니다.
+그 후 다시 쓰기 버튼을 구현했습니다.
+``` ruby
+void CPractice8aDlg::OnClickedButtonReset()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_strDept.Empty();
+	m_strID.Empty();
+	m_strName.Empty();
+	UpdateData(FALSE);
+}
+```
+다시 쓰기 버튼을 누르면 현재 입력한 데이터를 모두 초기화 합니다.
+* 트리 컨트롤
+트리 컨트롤을 만들고 수정하고 삭제합니다
+![image](https://github.com/user-attachments/assets/056cd1f4-36d0-4fb3-b3b4-abcda8f59530)
+대화상자를 만든 뒤에
+``` ruby
+void CPractice8bDlg::OnClickedButtonInsert()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(TRUE);
+	//에러 처리 - 입력할 텍스트가 비어 있나 검사한다.
+	if (!m_strNodeText.IsEmpty())
+	{
+		m_treeControl.InsertItem(m_strNodeText, m_hSelectedNode, TVI_LAST);
+		m_treeControl.Expand(m_hSelectedNode, TVE_EXPAND);
+	}
+	else
+	{
+		AfxMessageBox(_T("입력 노드의 텍스트를 입력하세요."));
+	}
+	//Edit Box의 텍스트를 비운다
+	m_strNodeText.Empty();
+	UpdateData(FALSE);
+}
+
+
+void CPractice8bDlg::OnClickedButtonModify()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(TRUE);
+	//입력할 텍스트가 비어 있는지 검사
+	if (!m_strNodeText.IsEmpty())
+	{
+		if (m_hSelectedNode != m_hRoot)
+		{
+			//선택된 아이템의 텍스트를 수정한다.
+			m_treeControl.SetItemText(m_hSelectedNode, m_strNodeText);
+			//현재 선택된 아이템의 이름을 표현하는 Edit Control의 내용도 수정해 준다.
+			m_strSelectedNode = m_strNodeText;
+		}
+		else
+		{
+			AfxMessageBox(_T("루트 노드는 수정해서는 안 됩니다."));
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("수정 노드의 텍스트를 입력하세요."));
+	}
+	m_strNodeText.Empty();
+	UpdateData(FALSE);
+}
+
+
+void CPractice8bDlg::OnClickedButtonDelete()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_hSelectedNode != m_hRoot)
+	{
+		if (MessageBox(_T("정말 삭제하시겠습니까?"), _T("삭제 경고"), MB_YESNO) == IDYES)
+		{
+			m_treeControl.DeleteItem(m_hSelectedNode);
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("루트 노드는 삭제해서는 안 됩니다."));
+	}
+}
+
+
+void CPractice8bDlg::OnClickedCheckExpand()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_bChecked = !m_bChecked;
+	m_treeControl.Expand(m_hRoot, TVE_TOGGLE);
+	m_hSelectedNode = m_hRoot;
+	m_strSelectedNode = _T("루트 노드");
+	UpdateData(FALSE);
+}
+```
+트리를 구현합니다
+![image](https://github.com/user-attachments/assets/bee62579-f9de-4161-8a0e-191fe62e927c)
+실행화면입니다.
+
+-----------
+* 탭 컨트롤 활용한 도형 출력 프로젝트
+먼저 대화상자를 구성합니다.
+![image](https://github.com/user-attachments/assets/30a92165-38a3-4216-bfdd-cb2a8dfa8f84)
+그 뒤 도형을 출력하고 설정하는 것을 구현합니다
+``` ruby
+void CPractiec9aDlg::OnSelchangeTabSelection(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int nSelection = m_tabSelection.GetCurSel();
+	switch (nSelection)
+	{
+	case 0 :
+		m_dlgObject.ShowWindow(SW_SHOW);
+		m_dlgColor.ShowWindow(SW_HIDE);
+		m_dlgRatio.ShowWindow(SW_HIDE);
+		break;
+	case 1 :
+		m_dlgObject.ShowWindow(SW_HIDE);
+		m_dlgColor.ShowWindow(SW_SHOW);
+		m_dlgRatio.ShowWindow(SW_HIDE);
+		break;
+	case 2 :
+		m_dlgObject.ShowWindow(SW_HIDE);
+		m_dlgColor.ShowWindow(SW_HIDE);
+		m_dlgRatio.ShowWindow(SW_SHOW);
+		break;
+	}
+	*pResult = 0;
+}
+
+BOOL CColorDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	m_colorObject = RGB(255, 0, 0);
+	m_sliderRed.SetRange(0, 255);
+	m_sliderGreen.SetRange(0, 255);
+	m_sliderBlue.SetRange(0, 255);
+	m_sliderRed.SetPos(255);
+	m_sliderGreen.SetPos(0);
+	m_sliderBlue.SetPos(0);
+	m_nRed = 255;
+	m_nGreen = 0;
+	m_nBlue = 0;
+	UpdateData(FALSE);
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void CColorDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	//탭 컨트롤을 포함하고 있는 메인 대화상자의 인스턴스를 얻는다.
+	CPractiec9aDlg* pMainDlg = (CPractiec9aDlg*)AfxGetMainWnd();
+	if (pScrollBar->GetSafeHwnd() == m_sliderRed.m_hWnd)
+	{
+		m_nRed = m_sliderRed.GetPos();
+	}
+	else if (pScrollBar->GetSafeHwnd() == m_sliderGreen.m_hWnd)
+	{
+		m_nGreen = m_sliderGreen.GetPos();
+	}
+	else if (pScrollBar->GetSafeHwnd() == m_sliderBlue.m_hWnd)
+	{
+		m_nBlue = m_sliderBlue.GetPos();
+	}
+	else
+	{
+		return;
+	}
+	m_colorObject = RGB(m_nRed, m_nGreen, m_nBlue);
+	UpdateData(FALSE);
+	pMainDlg->UpdateDrawing();;
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+BOOL CRatioDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	m_bSameRatio = TRUE;
+	((CButton*)GetDlgItem(IDC_CHECK_SAME_RATIO))->SetCheck(TRUE);
+	m_sliderHorizontal.SetRange(0, 100);
+	m_sliderVertical.SetRange(0, 100);
+	m_sliderHorizontal.SetPos(50);
+	m_sliderVertical.SetPos(50);
+	m_nHorizontal = 50;
+	m_nVertical = 50;
+	m_nCurHScale = 50;
+	m_nCurVScale = 50;
+	UpdateData(FALSE);
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void CRatioDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPractiec9aDlg* pMainDlg = (CPractiec9aDlg*)AfxGetMainWnd();
+	m_nCurHScale = m_sliderHorizontal.GetPos();
+	m_nCurVScale = m_sliderVertical.GetPos();
+	if (pScrollBar->GetSafeHwnd() == m_sliderHorizontal.m_hWnd)
+	{
+		if (m_bSameRatio == TRUE)
+		{
+			m_sliderVertical.SetPos(m_nCurHScale);
+		}
+	}
+	else if (pScrollBar->GetSafeHwnd() == m_sliderVertical.m_hWnd)
+	{
+		if (m_bSameRatio == TRUE)
+		{
+			m_sliderHorizontal.SetPos(m_nCurVScale);
+		}
+	}
+	else
+	{
+		return;
+	}
+	m_nHorizontal = m_nCurHScale;
+	m_nVertical = m_nCurVScale;
+	UpdateData(FALSE);
+	pMainDlg->UpdateDrawing();
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CRatioDlg::OnClickedCheckSameRatio()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(TRUE);
+	CPractiec9aDlg* pMainDlg = (CPractiec9aDlg*)AfxGetMainWnd();
+	m_bSameRatio = !m_bSameRatio;
+	if (m_bSameRatio == TRUE)
+	{
+		if (m_nCurHScale > m_nCurVScale)
+		{
+			m_nHorizontal = m_sliderHorizontal.GetPos();
+			m_nVertical = m_nHorizontal;
+		}
+		else
+		{
+			m_nVertical = m_sliderVertical.GetPos();
+			m_nHorizontal = m_nVertical;
+		}
+		m_nCurHScale = m_nHorizontal;
+		m_nCurVScale = m_nVertical;
+		m_sliderHorizontal.SetPos(m_nCurVScale);
+		m_sliderVertical.SetPos(m_nCurVScale);
+		UpdateData(FALSE);
+	}
+	pMainDlg->UpdateDrawing();
+}
+
+BOOL CObjectDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	m_nSelObject = 1;
+	((CButton*)GetDlgItem(IDC_RADIO_RECT))->SetCheck(TRUE);
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void CObjectDlg::OnRadioRect()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	//탭 컨트롤을 포함하고 있는 메인 대화상자의 인스턴스를 얻는다.
+	CPractiec9aDlg* pMainDlg = (CPractiec9aDlg*)AfxGetMainWnd();
+	m_nSelObject = 1;
+	pMainDlg->UpdateDrawing();
+}
+
+
+void CObjectDlg::OnRadioCircle()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	//탭 컨트롤을 포함하고 있는 메인 대화상자의 인스턴스를 얻는다.
+	CPractiec9aDlg* pMainDlg = (CPractiec9aDlg*)AfxGetMainWnd();
+	m_nSelObject = 2;
+	pMainDlg->UpdateDrawing();
+}
+```
+색상,도형,비율 선택하는 대화상자를 출력하는 코드와 각각의 기능을 구현하는 코드입니다.
+출력화면
+![image](https://github.com/user-attachments/assets/bec88d1c-1397-4c35-8351-029ef1269a45)
+색을 바꾸고 도형을 바꾸고 크기를 바꾼 모습입니다
+
+-------------
