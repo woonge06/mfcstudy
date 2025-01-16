@@ -172,4 +172,66 @@ void CPractice6aView::OnMouseMove(UINT nFlags, CPoint point)
 출력하면 예시로 색상 메뉴에서 면 색상을 변경하고 원 툴바를 누른디 마우스로 원을 그렸습니다.
 
 ---------------------------------------
-* 
+* GDI +
+GDI+란 GDI의 업그레이드 버전으로 복잡하고 섬세한 그래픽을 출력할 수 있는 기존의 기능을 최적화한 새로운 출력 모듈입니다.
+* GDI+를 이용한 펜과 지우개를 이용한 그림판 만들기
+이 프로젝트에선 왼쪽 마우스는 펜의 기능을 가지고, 오른쪽 마우스는 지우개 기능을 가지는 프로젝트를 만들었습니다.
+먼저 툴바를 만들고, 펜과 지우개의 커서 리소스를 만든 뒤에 펜과 지우개의 크기를 정하는 대화상자를 만들었습니다.
+![image](https://github.com/user-attachments/assets/6e6701a2-bb1f-4502-bf14-2e9c39a9bf30)
+그 후에 메뉴들에 대한 함수들을 만들고, 마우스가 눌렸을 때와 움직였을 때의 기능을 구현했습니다.
+``` ruby
+void CPractice7bView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	m_ptPrev = point;
+	HCURSOR hCursor = AfxGetApp()->LoadCursor(IDC_CURSOR_PEN);
+	SetCursor(hCursor);
+	CView::OnLButtonDown(nFlags, point);
+}
+
+
+void CPractice7bView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	m_ptPrev = point;
+	HCURSOR hCursor = AfxGetApp()->LoadCursor(IDC_CURSOR_ERASER);
+	SetCursor(hCursor);
+	CView::OnRButtonDown(nFlags, point);
+}
+
+
+void CPractice7bView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CClientDC dc(this);
+	Graphics graphics(dc);
+	Gdiplus::Color clr; //GDI+로의 색상변경
+	clr.SetFromCOLORREF(m_colorPen);
+
+	if (nFlags == MK_LBUTTON)
+	{
+		HCURSOR hCursor = AfxGetApp()->LoadCursorW(IDC_CURSOR_PEN);
+		SetCursor(hCursor);
+		Pen pen(Color(clr), m_nPenSize);
+		graphics.DrawLine(&pen, m_ptPrev.x, m_ptPrev.y, point.x, point.y);
+		m_ptPrev = point;
+	}
+
+	if (nFlags == MK_RBUTTON)
+	{
+		HCURSOR hCursor = AfxGetApp()->LoadCursorW(IDC_CURSOR_ERASER);
+		SetCursor(hCursor);
+		Pen pen(Color(255, 255, 255), m_nEraserSize);
+		graphics.DrawLine(&pen, m_ptPrev.x, m_ptPrev.y, point.x, point.y);
+		m_ptPrev = point;
+	}
+
+	CView::OnMouseMove(nFlags, point);
+}
+```
+왼쪽 마우스를 누르면 커서가 바뀌고, 이동시키면 펜의 색상이 GDI+ 형식으로 바뀌며 오른쪽 마우스를 누르면 커서가 바뀌고, 이동시키면 지우개의 색상이 흰색이 됩니다.
+출력화면
+![image](https://github.com/user-attachments/assets/94852b51-c1bd-4a39-a4a8-23c21de78ca5)
+실행하면 예시로 좌클릭으로 그림을 그리고, 우클릭으로 일부를 지운 화면입니다.
+
+--------------------------
