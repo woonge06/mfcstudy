@@ -644,3 +644,9 @@ void CObjectDlg::OnRadioCircle()
 색을 바꾸고 도형을 바꾸고 크기를 바꾼 모습입니다
 
 -------------
+* 고급 컨트롤 및 리본을 활용하여 명함 만들기 프로젝트
+먼저 대화상자를 구현합니다.
+![image](https://github.com/user-attachments/assets/f9a6e9d8-c8b5-4cad-a171-a66e7b53acf9)
+그 뒤 명함을 만드는 것을 구현합니다.
+``` ruby
+
